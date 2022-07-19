@@ -1,0 +1,24 @@
+Package: IntroductionCausalCiscovery
+Type: Package
+Title: Introduction to Causal Discovery (V Didelez)
+Version: 1.0.0
+Author: Authors@R: 
+    c(person(given = "Ronja",
+             family = "Foraita",
+             role = c("aut", "cre"),
+             email = "foraita@leibniz-bips.de"),
+      person(given = "Christine",
+             family = "Winther Bang",
+             role = c("aut"),
+             email = "bang@leibniz-bips.de")
+Maintainer: R Foraita <foraita@leibniz-bips.de>
+Description: Installs all necessary packages and provides R codes and illustrative data.
+Depends: R (>= 4.0.0)
+Imports: BiocManager, data.table, GeneralisedCovarianceMeasure, survey, tidyverse
+URL: https://github.com/bips-hb/introduction-causal-discovery
+VignetteBuilder: knitr
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.0
+Suggests: rmarkdown, knitr, dagitty, gRbase
