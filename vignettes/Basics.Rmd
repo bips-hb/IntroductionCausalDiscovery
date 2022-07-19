@@ -3,14 +3,11 @@ title: "Statistical Computing 2022, Reisensburg"
 subtitle: "Introduction to Causal Discovery (part 1)"
 author: "V Didelez, R Foraita, C W Bang"
 date: "July 25 2022"
-output: 
-  html_document:
-    theme: cerulean
-    highlight: tango
-    toc: true
-    toc_float:
-      collapsed: true
-      smooth_scroll: true    
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Causal Reasoning}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8} 
 ---
 
   

@@ -3,14 +3,11 @@ title: "Statistical Computing 2022, Reisensburg"
 subtitle: "Introduction to Causal Discovery (part 2)"
 author: "V Didelez, C W Bang"
 date: "July 25 2022"
-output: 
-  html_document:
-    theme: cerulean
-    highlight: tango
-    toc: true
-    toc_float:
-      collapsed: true
-      smooth_scroll: true    
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Causal Reasoning}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}  
 ---
   
 ```{r setup, include=FALSE}
@@ -23,8 +20,8 @@ knitr::opts_chunk$set(echo = TRUE,
 ```
 
 
-```{r}
-#library(IntroductionCausalDiscovery)
+```{r libraries}
+library(IntroductionCausalDiscovery)
 library(tidyverse)
 library(pcalg)
 ```
@@ -75,6 +72,7 @@ pcfit <- pc(
 )
 ```
 
+We get 12 edges regardless of the level of alpha:
 
 ```{r fitalpha_tcga}
 plot(pc(
@@ -113,6 +111,22 @@ fcifit <- fci(
 plot(fcifit)
 ```
 
+With alpha = 0.1 we get 12 edges as for the PC-algorithm:
+
+```{r fitfci2}
+fcifit <- fci(
+  suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]),
+  indepTest = gaussCItest,
+  alpha = 0.1,
+  labels = colnames(tcgas),
+  maj.rule = TRUE,
+  selectionBias = FALSE
+)
+```
+
+```{r plotfci2}
+plot(fcifit)
+```
 
 # GES-algorithm
 
@@ -187,6 +201,21 @@ plot(pcfit_kernel05, main = "alpha = 5%")
 plot(pcfit_kernel10, main = "alpha = 10%")
 ```
 
+With alpha = 0.16 we get 12 edges:
+
+```{r fitkernel2}
+pcfit_kernel16 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
+                     indepTest = kernelCItest,
+                     alpha = 0.16,
+                     labels = colnames(tcgas),
+                     maj.rule = TRUE, solve.confl = TRUE, u2pd = "relaxed")
+```
+
+```{r plotkernel2}
+par(mfrow = c(1,1))
+plot(pcfit_kernel16, main = "alpha = 16%")
+```
+
 
 # Generalised Covariance Measure
 
@@ -225,13 +254,13 @@ pcfit_gcm10 <- pc(suffStat = list(data = tcgas, alpha = 0.1),
                   )
 ```
 
+For both levels of alpha we get 12 edges:
 
 ```{r plot_gcm}
 par(mfrow = c(1,2))
 plot(pcfit_gcm05, main = "alpha = 5%")
 plot(pcfit_gcm10, main = "alpha = 10%")
 ```
-
 
 
 # Discrete data
@@ -276,22 +305,24 @@ plot(pcfit_d05@graph, main = "alpha = 5%")
 plot(pcfit_d10@graph, main = "alpha = 10%")
 ```
 
+With alpha = 0.36 we get 12 edges:
+
+```{r fit_dis2}
+pcfit_d36 <- pc(suffStat = list(dm = tcgadisc, adaptDF = F),
+                indepTest = disCItest_mod,
+                alpha = 0.36,
+                labels = colnames(tcgadisc),
+                maj.rule = T, solve.confl = T, u2pd = "relaxed"
+                )
+```
+
+
+```{r plot_dis2}
+par(mfrow = c(1,1))
+plot(pcfit_d10@graph, main = "alpha = 36%")
+```
 
 # Comparison
-
-```{r compare_fit}
-par(mfrow = c(1,2))
-plot(pcfit@graph, main = "PC (left) and FCI (right)")
-plot(fcifit)
-par(mfrow = c(1,2))
-plot(gesfit$essgraph, main = "GES")
-plot(lingamgraph, main = "LiNGAM")
-par(mfrow = c(1,2))
-plot(pcfit_gcm10@graph, main = "GCM")
-plot(pcfit_kernel10@graph, main = "Kernel")
-par(mfrow = c(1,1))
-plot(pcfit_d10@graph, main = "Discrete")
-```
 
 
 ```{r libgrbase}
