@@ -1,4 +1,4 @@
-# introduction-causal-discovery
+# Introduction to Causal Discovery
 
 An introduction to causal discovery by Vanessa Didelez. 
 Presented at the 52th workshop of the working group "Statistical Computing" (IBS-DR/GMDS, 25. July 2022).
@@ -11,6 +11,6 @@ devtools::install_github("bips-hb/DataTrainCausalLearning", build_vignettes = TR
 
 # building the vignettes will take a while....
 
-library(DataTrainCausalLearning)
+library(IntroductionCausalDiscovery)
 install_the_rest()              # this takes again a few minutes
 ```
