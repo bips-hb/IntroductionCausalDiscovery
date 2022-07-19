@@ -7,7 +7,7 @@ Presented at the 52th workshop of the working group "Statistical Computing" (IBS
 Install the package `devtools` from CRAN. Windows user have to make sure that Rtools40 (for R from version 4.0.0 to 4.1.3) or Rtools42 (for R >= 4.2.0) is installed on their computer. Then run the following commands:
 
 ```R
-devtools::install_github("bips-hb/DataTrainCausalLearning", build_vignettes = TRUE)
+devtools::install_github("bips-hb/IntroductionCausalDiscovery", build_vignettes = TRUE)
 
 # building the vignettes will take a while....
 
