@@ -5,7 +5,7 @@
 \alias{bcrot}
 \title{Rotterdam data set on breast cancer}
 \format{
-A A data frame with 2982 observations on the following 6 variables:
+A data frame with 2982 observations on the following 6 variables:
 \describe{
   \item{hormon}{hormonal treatment (0=no, 1=yes)}
   \item{age}{age at diagnosis}

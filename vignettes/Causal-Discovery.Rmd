@@ -15,12 +15,12 @@ knitr::opts_chunk$set(echo = TRUE,
                       fig.width = 6, 
                       message = FALSE, 
                       warning = FALSE, 
-                      cache = TRUE, 
+                      cache = FALSE, 
                       eval = TRUE)
 ```
 
 
-```{r libraries}
+```{r libraries, warning = FALSE}
 library(IntroductionCausalDiscovery)
 library(tidyverse)
 library(pcalg)
@@ -49,7 +49,7 @@ plot(tcgas, cex = 0.3)
 ```
 
 
-```{r hist_tcga}
+```{r hist_tcga, warning = FALSE}
 tcgas %>% 
   gather() %>% 
   ggplot(aes(x = value)) +
@@ -179,7 +179,7 @@ pcfit_kernel10 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
 
 ```{r fitkernel2, echo = FALSE, eval = FALSE}
 pcfit_kernel16 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
-                     indepTest = kernelCItest,
+                     indepTest = kpcalg::kernelCItest,
                      alpha = 0.16,
                      labels = colnames(tcgas),
                      maj.rule = TRUE, solve.confl = TRUE, u2pd = "relaxed")

@@ -107,7 +107,7 @@ adjustmentSets(g2)
 
 # Simulated data examples
 
-```{r}
+```{r, warning = FALSE}
 library(gRbase)
 ```
 
@@ -168,9 +168,7 @@ summary(lm(y ~ x1 + x2 + l))$coefficients
 ```{r}
 x2_new <- sample(c(1,0), N, replace = T)
 y_new <- u + x1 + l + x2_new + rnorm(N)
-```
 
-```{r}
 summary(lm(y_new ~ x1 + x2_new))$coefficients
 ```
 
