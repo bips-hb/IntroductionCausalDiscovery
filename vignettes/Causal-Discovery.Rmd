@@ -1,16 +1,13 @@
 ---
-title: "Statistical Computing 2022, Reisensburg"
-subtitle: "Introduction to Causal Discovery (part 2)"
+title: "Introduction to Causal Discovery (part 2)"
+subtitle: "Statistical Computing 2022, Reisensburg"
 author: "V Didelez, C W Bang"
 date: "July 25 2022"
-output: 
-  html_document:
-    theme: cerulean
-    highlight: tango
-    toc: true
-    toc_float:
-      collapsed: true
-      smooth_scroll: true    
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to Causal Discovery (part 2)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}      
 ---
   
 ```{r setup, include=FALSE}
@@ -24,7 +21,7 @@ knitr::opts_chunk$set(echo = TRUE,
 
 
 ```{r}
-#library(IntroductionCausalDiscovery)
+library(IntroductionCausalCiscovery)
 library(tidyverse)
 library(pcalg)
 ```
@@ -65,7 +62,7 @@ tcgas %>%
 
 # PC-algorithm
 
-```{r fitpc_tcga}
+```{r fitpc_tcga, cache=TRUE}
 pcfit <- pc(
   suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]), # correlation matrix and the number of observations
   indepTest = gaussCItest, # our choice of independence test
@@ -76,7 +73,7 @@ pcfit <- pc(
 ```
 
 
-```{r fitalpha_tcga}
+```{r fitalpha_tcga, cache=TRUE}
 plot(pc(
   suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]),
   indepTest = gaussCItest,
@@ -98,7 +95,7 @@ plot(pc(
 
 # FCI-algorithm
 
-```{r fitfci}
+```{r fitfci, cache=TRUE}
 fcifit <- fci(
   suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]),
   indepTest = gaussCItest,
@@ -116,7 +113,7 @@ plot(fcifit)
 
 # GES-algorithm
 
-```{r fitges_tcga}
+```{r fitges_tcga, cache=TRUE}
 gesfit <- ges(new("GaussL0penObsScore", tcgas))
 ```
 
@@ -128,7 +125,7 @@ plot(gesfit$essgraph)
 
 # LiNGAM
 
-```{r fitlingam_tcga}
+```{r fitlingam_tcga, cache=TRUE}
 lingamfit <- lingam(tcgas)
 ```
 
@@ -147,7 +144,7 @@ lingam2graph <- function(fit,data){
 ```
 
 
-```{r graphlingam_tcga}
+```{r graphlingam_tcga, cache=TRUE}
 lingamgraph <- lingam2graph(fit = lingamfit, # fitted object
                             data = tcgas) # data used to fit the object
 ```
@@ -166,7 +163,7 @@ library(kpcalg)
 ```
 
 
-```{r kpcfit}
+```{r kpcfit, cache=TRUE}
 pcfit_kernel05 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
                      indepTest = kernelCItest,
                      alpha = 0.05,
@@ -210,7 +207,7 @@ use_gcm <- function(x, y, S, suffStat){
 ```
 
 
-```{r pcfit_gcm}
+```{r pcfit_gcm, cache=TRUE}
 pcfit_gcm05 <- pc(suffStat = list(data = tcgas, alpha = 0.05),
                   indepTest = use_gcm,
                   alpha = 0.05,
@@ -254,7 +251,7 @@ disCItest_mod <- function(x, y, S, suffStat){
 ```
 
 
-```{r fitdis}
+```{r fitdis, cache=TRUE}
 pcfit_d05 <- pc(suffStat = list(dm = tcgadisc, adaptDF = F),
                 indepTest = disCItest_mod,
                 alpha = 0.05,
