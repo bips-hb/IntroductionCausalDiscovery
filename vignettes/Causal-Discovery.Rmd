@@ -90,6 +90,8 @@ pcfit10 <- pc(
 ```
 
 ```{r plotpc}
+par(mfrow = c(1,3))
+
 plot(pcfit01@graph, main = "alpha = 1%")
 plot(pcfit05@graph, main = "alpha = 5%")
 plot(pcfit10@graph, main = "alpha = 10%")
