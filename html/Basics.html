@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="V Didelez, R Foraita, C W Bang" />
+
+
+<title>Introduction to Causal Discovery (part 1)</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to Causal Discovery (part
+1)</h1>
+<h3 class="subtitle">Statistical Computing 2022, Reisensburg</h3>
+<h4 class="author">V Didelez, R Foraita, C W Bang</h4>
+<h4 class="date">July 25 2022</h4>
+
+
+
+<div id="make-use-of-the-dagitty-package" class="section level1">
+<h1>Make use of the DAGitty package</h1>
+<p>Enter the following DAG into R: <a href="dagitty.net/ms0VVMy">dagitty.net/ms0VVMy</a></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dagitty)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Build the graph</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">dagitty</span>(<span class="st">&quot;dag {</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="st">              ESRD [outcome]</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="st">              current.smoking [exposure]</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="st">              baseline.covariates -&gt; earlier.smoking</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="st">              baseline.covariates -&gt; prior.disease</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="st">              baseline.covariates -&gt; ESRD</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="st">              current.smoking -&gt; ESRD</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="st">              earlier.smoking -&gt; current.smoking</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="st">              earlier.smoking -&gt; prior.disease</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="st">              prior.disease -&gt; current.smoking</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="st">              prior.disease -&gt; ESRD</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="st">              }&quot;</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">graphLayout</span>(g))</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div id="making-earlier-smoking-unobserved" class="section level2">
+<h2>Making ‘earlier smoking’ unobserved</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>g.unob <span class="ot">&lt;-</span> g</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">latents</span>(g.unob) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;earlier.smoking&quot;</span>)</span></code></pre></div>
+</div>
+<div id="list-adjustment-sets" class="section level2">
+<h2>List adjustment sets</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">adjustmentSets</span>(g, <span class="at">type =</span> <span class="st">&quot;minimal&quot;</span>, <span class="at">effect =</span> <span class="st">&quot;total&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="do">## { baseline.covariates, prior.disease }</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="do">## { earlier.smoking, prior.disease }</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">adjustmentSets</span>(g.unob, <span class="at">type =</span> <span class="st">&quot;minimal&quot;</span>, <span class="at">effect =</span> <span class="st">&quot;total&quot;</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="do">## { baseline.covariates, prior.disease }</span></span></code></pre></div>
+</div>
+<div id="list-testable-implications" class="section level2">
+<h2>List testable implications</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">impliedConditionalIndependencies</span>(g))</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="do">## ESRD _||_ erl. | bsl., crr., prr.</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="do">## bsl. _||_ crr. | erl., prr.</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">impliedConditionalIndependencies</span>(g.unob))</span></code></pre></div>
+</div>
+<div id="list-total-effects-that-are-identifiable-by-regression" class="section level2">
+<h2>List total effects that are identifiable by regression</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(n <span class="cf">in</span> <span class="fu">names</span>(g.unob)){</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(m <span class="cf">in</span> <span class="fu">setdiff</span>(dagitty<span class="sc">::</span><span class="fu">descendants</span>(g.unob, n), n)){</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    a <span class="ot">&lt;-</span> <span class="fu">adjustmentSets</span>(g.unob, n, m)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">length</span>(a) <span class="sc">&gt;</span> <span class="dv">0</span>){</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cat</span>(<span class="st">&quot;The total effect of &quot;</span>, n,<span class="st">&quot; on &quot;</span>, m,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>          <span class="st">&quot; is identifiable controlling for:</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;&quot;</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">print</span>(a, <span class="at">prefix=</span><span class="st">&quot; * &quot;</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="do">## The total effect of baseline.covariates on prior.disease is identifiable controlling for:</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="do">##  *  {}</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="do">## The total effect of baseline.covariates on current.smoking is identifiable controlling for:</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="do">##  *  {}</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="do">## The total effect of baseline.covariates on earlier.smoking is identifiable controlling for:</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="do">##  *  {}</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="do">## The total effect of baseline.covariates on ESRD is identifiable controlling for:</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="do">##  *  {}</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="do">## The total effect of current.smoking on ESRD is identifiable controlling for:</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="do">## { baseline.covariates, prior.disease }</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="do">## The total effect of earlier.smoking on prior.disease is identifiable controlling for:</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="do">## { baseline.covariates }</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="do">## The total effect of earlier.smoking on ESRD is identifiable controlling for:</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="do">## { baseline.covariates }</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="do">## The total effect of earlier.smoking on current.smoking is identifiable controlling for:</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="do">## { baseline.covariates }</span></span></code></pre></div>
+</div>
+<div id="list-all-back-door-paths" class="section level2">
+<h2>List all back-door paths</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## show paths</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>(pfad <span class="ot">&lt;-</span> <span class="fu">paths</span>(g.unob, <span class="at">from =</span> <span class="st">&quot;current.smoking&quot;</span>, <span class="at">to =</span> <span class="st">&quot;ESRD&quot;</span>))</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="do">## $paths</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] &quot;current.smoking -&gt; ESRD&quot;                                                           </span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="do">## [2] &quot;current.smoking &lt;- earlier.smoking -&gt; prior.disease -&gt; ESRD&quot;                       </span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="do">## [3] &quot;current.smoking &lt;- earlier.smoking -&gt; prior.disease &lt;- baseline.covariates -&gt; ESRD&quot;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="do">## [4] &quot;current.smoking &lt;- earlier.smoking &lt;- baseline.covariates -&gt; ESRD&quot;                 </span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="do">## [5] &quot;current.smoking &lt;- earlier.smoking &lt;- baseline.covariates -&gt; prior.disease -&gt; ESRD&quot;</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="do">## [6] &quot;current.smoking &lt;- prior.disease -&gt; ESRD&quot;                                          </span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="do">## [7] &quot;current.smoking &lt;- prior.disease &lt;- baseline.covariates -&gt; ESRD&quot;                   </span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="do">## [8] &quot;current.smoking &lt;- prior.disease &lt;- earlier.smoking &lt;- baseline.covariates -&gt; ESRD&quot;</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="do">## $open</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="do">## [1]  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co"># number of open back-door paths</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(pfad<span class="sc">$</span>open)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 7</span></span></code></pre></div>
+</div>
+<div id="insert-new-node" class="section level2">
+<h2>Insert new node</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>g2 <span class="ot">&lt;-</span> <span class="fu">dagitty</span>(<span class="st">&quot;dag {</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="st">              ESRD [outcome]</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="st">              current.smoking [exposure]</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="st">              unknown [latent]</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="st">              baseline.covariates -&gt; earlier.smoking</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="st">              baseline.covariates -&gt; prior.disease</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="st">              baseline.covariates -&gt; ESRD</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="st">              current.smoking -&gt; ESRD</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="st">              earlier.smoking -&gt; current.smoking</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="st">              earlier.smoking -&gt; prior.disease</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="st">              prior.disease -&gt; current.smoking</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="st">              prior.disease -&gt; ESRD</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="st">              prior.disease &lt;- unknown -&gt; ESRD</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="st">              }&quot;</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">graphLayout</span>(g2))</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">adjustmentSets</span>(g2)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="do">## { earlier.smoking, prior.disease }</span></span></code></pre></div>
+</div>
+</div>
+<div id="simulated-data-examples" class="section level1">
+<h1>Simulated data examples</h1>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gRbase)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="do">## Warning: Paket &#39;gRbase&#39; wurde unter R Version 4.1.3 erstellt</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Attache Paket: &#39;gRbase&#39;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="do">## Die folgenden Objekte sind maskiert von &#39;package:dagitty&#39;:</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="do">##     ancestors, children, edges, moralize, parents</span></span></code></pre></div>
+<div id="example-1" class="section level2">
+<h2>Example 1</h2>
+<p><img src="data:image/png;base64,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" width="50%" /></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>x1 <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">0</span>), N, <span class="at">replace =</span> T)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>l <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(N, <span class="dv">1</span>, <span class="dv">2</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="fl">1.5</span><span class="sc">*</span>x1 <span class="sc">*</span> l <span class="sc">+</span> <span class="dv">2</span>)) </span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>x2 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(N, <span class="dv">1</span>, p)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fl">0.5</span> <span class="sc">*</span> l <span class="sc">+</span> <span class="fu">rnorm</span>(N, <span class="dv">2</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(y <span class="sc">~</span> x1))<span class="sc">$</span>coefficients</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="do">##                Estimate Std. Error     t value      Pr(&gt;|t|)</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="do">## (Intercept) 2.453232848 0.06529014 37.57432129 2.971796e-193</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="do">## x1          0.005634801 0.09493297  0.05935557  9.526808e-01</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2))<span class="sc">$</span>coefficients</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="do">##               Estimate Std. Error   t value      Pr(&gt;|t|)</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="do">## (Intercept)  2.3325165 0.06308566 36.973799 3.996803e-189</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="do">## x1          -0.3725138 0.09717164 -3.833565  1.342150e-04</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="do">## x2           1.1566819 0.11074304 10.444737  2.636869e-24</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> l))<span class="sc">$</span>coefficients</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="do">##                Estimate Std. Error    t value      Pr(&gt;|t|)</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="do">## (Intercept)  1.95146795 0.04603497 42.3909919 3.078516e-225</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="do">## x1          -0.02674867 0.06932362 -0.3858521  6.996886e-01</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="do">## x2           0.03581838 0.08561319  0.4183745  6.757635e-01</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="do">## l            0.53727003 0.01688683 31.8159193 7.597036e-154</span></span></code></pre></div>
+</div>
+<div id="example-2" class="section level2">
+<h2>Example 2</h2>
+<p><img src="data:image/png;base64,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" width="50%" /></p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>x1 <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">0</span>), N, <span class="at">replace =</span> T)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>u <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(N, <span class="dv">2</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>l <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> x1 <span class="sc">-</span> u <span class="sc">+</span> <span class="fu">rnorm</span>(N, <span class="dv">1</span>, <span class="dv">2</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">3</span> <span class="sc">*</span> x1 <span class="sc">+</span> l)) </span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>x2 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(N, <span class="dv">1</span>, p)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> u <span class="sc">+</span> x1 <span class="sc">+</span> l <span class="sc">+</span> x2 <span class="sc">+</span> <span class="fu">rnorm</span>(N)</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2))<span class="sc">$</span>coefficients</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="do">##              Estimate Std. Error   t value      Pr(&gt;|t|)</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="do">## (Intercept)  2.479441  0.1172808  21.14106  2.949792e-82</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="do">## x1           3.319142  0.1251579  26.51964 1.064670e-117</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="do">## x2          -1.486958  0.1339001 -11.10498  4.271572e-27</span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> l))<span class="sc">$</span>coefficients</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="do">##              Estimate Std. Error   t value      Pr(&gt;|t|)</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="do">## (Intercept) 1.7784792 0.08077974 22.016401  7.614578e-88</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="do">## x1          1.3762105 0.10010859 13.747177  1.672066e-39</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="do">## x2          0.9155497 0.11242695  8.143507  1.141199e-15</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="do">## l           0.8075733 0.02292163 35.231929 3.175743e-177</span></span></code></pre></div>
+<div id="randomising-x_2" class="section level3">
+<h3>Randomising <span class="math inline">\(X_2\)</span></h3>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>x2_new <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">0</span>), N, <span class="at">replace =</span> T)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>y_new <span class="ot">&lt;-</span> u <span class="sc">+</span> x1 <span class="sc">+</span> l <span class="sc">+</span> x2_new <span class="sc">+</span> <span class="fu">rnorm</span>(N)</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(y_new <span class="sc">~</span> x1 <span class="sc">+</span> x2_new))<span class="sc">$</span>coefficients</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="do">##             Estimate Std. Error   t value     Pr(&gt;|t|)</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="do">## (Intercept) 1.148609  0.1237691  9.280259 1.023272e-19</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="do">## x1          2.863635  0.1430080 20.024297 3.097984e-75</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="do">## x2_new      1.006474  0.1429209  7.042170 3.522012e-12</span></span></code></pre></div>
+</div>
+<div id="inverse-probability-weights" class="section level3">
+<h3>Inverse probability weights</h3>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>log_model <span class="ot">&lt;-</span> <span class="fu">glm</span>(x2 <span class="sc">~</span> x1 <span class="sc">+</span> l, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link=</span><span class="st">&quot;logit&quot;</span>))</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>p_hat <span class="ot">&lt;-</span> <span class="fu">predict</span>(log_model, <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>w <span class="ot">&lt;-</span> (x2 <span class="sc">*</span> p_hat <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> x2) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p_hat))<span class="sc">^</span>(<span class="sc">-</span><span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">weights =</span> w))<span class="sc">$</span>coefficients</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="do">##              Estimate Std. Error   t value     Pr(&gt;|t|)</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="do">## (Intercept) 1.3055438  0.1122837 11.627190 2.144284e-29</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="do">## x1          3.1135847  0.1317356 23.635107 2.041627e-98</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="do">## x2          0.4402358  0.1316575  3.343796 8.571681e-04</span></span></code></pre></div>
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

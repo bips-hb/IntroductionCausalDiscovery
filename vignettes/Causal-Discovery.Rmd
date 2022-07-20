@@ -15,15 +15,15 @@ knitr::opts_chunk$set(echo = TRUE,
                       fig.width = 6, 
                       message = FALSE, 
                       warning = FALSE, 
-                      cache = TRUE, 
+                      cache = FALSE, 
                       eval = TRUE)
 
 options(rmarkdown.html_vignette.check_title = FALSE)
 ```
 
 
-```{r libraries}
-#library(IntroductionCausalDiscovery)
+```{r libraries, warning = FALSE}
+library(IntroductionCausalDiscovery)
 library(tidyverse)
 library(pcalg)
 ```
@@ -48,7 +48,7 @@ plot(tcgas, cex = 0.3)
 ```
 
 
-```{r hist_tcga}
+```{r hist_tcga, warning = FALSE}
 tcgas %>% 
   gather() %>% 
   ggplot(aes(x = value)) +
@@ -197,9 +197,9 @@ plot(pcfit_kernel10, main = "alpha = 10%")
 
 With alpha = 0.16 we get 12 edges:
 
-```{r fitkernel2}
+```{r fitkernel2, eval = FALSE}
 pcfit_kernel16 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
-                     indepTest = kernelCItest,
+                     indepTest = kpcalg::kernelCItest,
                      alpha = 0.16,
                      labels = colnames(tcgas),
                      maj.rule = TRUE, solve.confl = TRUE, u2pd = "relaxed")
