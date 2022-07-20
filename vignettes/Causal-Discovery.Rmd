@@ -21,7 +21,7 @@ knitr::opts_chunk$set(echo = TRUE,
 
 
 ```{r libraries}
-#library(IntroductionCausalDiscovery)
+library(IntroductionCausalDiscovery)
 library(tidyverse)
 library(pcalg)
 ```
@@ -87,12 +87,14 @@ pcfit10 <- pc(
                labels = colnames(tcgas),
              maj.rule = T, solve.confl = T, u2pd = "relaxed"
             )
+```
 
-
+```{r plotpc}
 plot(pcfit01@graph, main = "alpha = 1%")
 plot(pcfit05@graph, main = "alpha = 5%")
 plot(pcfit10@graph, main = "alpha = 10%")
 ```
+
 
 # FCI-algorithm
 
@@ -105,7 +107,10 @@ fcifit <- fci(
   maj.rule = TRUE,
   selectionBias = FALSE
 )
+```
 
+
+```{r plotfci}
 plot(fcifit, main = "alpha = 5%")
 ```
 
@@ -114,11 +119,12 @@ plot(fcifit, main = "alpha = 5%")
 
 ```{r fitges_tcga}
 gesfit <- ges(new("GaussL0penObsScore", tcgas))
-
-plot(gesfit$essgraph)
 ```
 
 
+```{r plotges_tcga}
+plot(gesfit$essgraph)
+```
 
 # LiNGAM
 
@@ -156,7 +162,7 @@ library(kpcalg)
 ```
 
 
-```{r kpcfit, eval=TRUE}
+```{r kpcfit, eval = FALSE}
 pcfit_kernel05 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
                      indepTest = kernelCItest,
                      alpha = 0.05,
@@ -171,20 +177,7 @@ pcfit_kernel10 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
 
 ```
 
-
-```{r kpcfitload, echo=FALSE}
-#load('kernel.RData')
-```
-
-```{r}
-par(mfrow = c(1,2))
-plot(pcfit_kernel05, main = "alpha = 5%")
-plot(pcfit_kernel10, main = "alpha = 10%")
-```
-
-With alpha = 0.16 we get 12 edges:
-
-```{r fitkernel2}
+```{r fitkernel2, echo = FALSE, eval = FALSE}
 pcfit_kernel16 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
                      indepTest = kernelCItest,
                      alpha = 0.16,
@@ -192,15 +185,17 @@ pcfit_kernel16 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
                      maj.rule = TRUE, solve.confl = TRUE, u2pd = "relaxed")
 ```
 
-```{r, echo = FALSE, eval = TRUE}
-save(pcfit_kernel05, pcfit_kernel10, pcfit_kernel16, file = 'kernel.RData')
+```{r kpcfitload, echo = FALSE}
+load('kernel.RData')
+#save(pcfit_kernel05, pcfit_kernel10, pcfit_kernel16, file = 'kernel.RData')
 ```
 
-```{r plotkernel2}
-par(mfrow = c(1,1))
-plot(pcfit_kernel16, main = "alpha = 16%")
-```
+```{r plot_kpc}
+par(mfrow = c(1,2))
 
+plot(pcfit_kernel05, main = "alpha = 5%")
+plot(pcfit_kernel10, main = "alpha = 10%")
+```
 
 
 # Generalised Covariance Measure
@@ -225,7 +220,7 @@ use_gcm <- function(x, y, S, suffStat){
 ```
 
 
-```{r pcfit_gcm, eval = TRUE}
+```{r pcfit_gcm, eval = FALSE}
 pcfit_gcm05 <- pc(suffStat = list(data = tcgas, alpha = 0.05),
                   indepTest = use_gcm,
                   alpha = 0.05,
@@ -241,12 +236,13 @@ pcfit_gcm10 <- pc(suffStat = list(data = tcgas, alpha = 0.1),
 ```
 
 ```{r load_gcm, echo = FALSE}
-save(pcfit_gcm05, pcfit_gcm10, file = 'gcm.RData')
-#load('gcm.RData')
+#save(pcfit_gcm05, pcfit_gcm10, file = 'gcm.RData')
+load('gcm.RData')
 ```
 
 ```{r plot_gcm}
 par(mfrow = c(1,2))
+
 plot(pcfit_gcm05, main = "alpha = 5%")
 plot(pcfit_gcm10, main = "alpha = 10%")
 ```
@@ -256,7 +252,6 @@ plot(pcfit_gcm10, main = "alpha = 10%")
 ```{r disdata}
 data(tcgadisc)
 ```
-
 
 ```{r disICfunc}
 disCItest_mod <- function(x, y, S, suffStat){
@@ -268,7 +263,9 @@ disCItest_mod <- function(x, y, S, suffStat){
   gSquareDis(x = x, y = y, S = S, dm = dm, nlev = nlev, adaptDF = adaptDF,
              verbose = FALSE, n.min = -1)
 }
- 
+```
+
+```{r disICfit}
 pcfit_d05 <- pc(suffStat = list(dm = tcgadisc, adaptDF = F),
                 indepTest = disCItest_mod,
                 alpha = 0.05,
@@ -286,6 +283,7 @@ pcfit_d10 <- pc(suffStat = list(dm = tcgadisc, adaptDF = F),
 
 ```{r plot_dis}
 par(mfrow = c(1,2))
+
 plot(pcfit_d05@graph, main = "alpha = 5%")
 plot(pcfit_d10@graph, main = "alpha = 10%")
 ```
@@ -314,13 +312,37 @@ fcifit <- fci(
   maj.rule = TRUE,
   selectionBias = FALSE
 )
+```
+
+```{r plotfci2}
+par(mfrow = c(1,1))
 
 plot(fcifit, main = "alpha = 10%")
 ```
 
-For kernel
 
-For gcm
+When running the PC-algorithm with kernel independence test, we get 12 edges if we set alpha = 0.16:
+
+```{r fitkernel3, eval = FALSE}
+pcfit_kernel16 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
+                     indepTest = kernelCItest,
+                     alpha = 0.16,
+                     labels = colnames(tcgas),
+                     maj.rule = TRUE, solve.confl = TRUE, u2pd = "relaxed")
+```
+
+```{r plotkernel2}
+plot(pcfit_kernel16, main = "alpha = 16%")
+```
+
+When running the PC-algorithm with the generalised covariance measure as our choice of independence test, we get 12 edges for both levels of alpha:
+
+```{r plot_gcm2}
+par(mfrow = c(1,2))
+
+plot(pcfit_gcm05, main = "alpha = 5%")
+plot(pcfit_gcm10, main = "alpha = 10%")
+```
 
 For discrete data, we need alpha = 0.36 to get 12 edges:
 
@@ -336,6 +358,7 @@ pcfit_d36 <- pc(suffStat = list(dm = tcgadisc, adaptDF = F),
 
 ```{r plot_dis2}
 par(mfrow = c(1,1))
+
 plot(pcfit_d10@graph, main = "alpha = 36%")
 ```
 
