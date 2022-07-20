@@ -1,6 +1,6 @@
 ---
-title: "Statistical Computing 2022, Reisensburg"
-subtitle: "Introduction to Causal Discovery (part 1)"
+title: "Basics"
+subtitle: "Statistical Computing 2022: Introduction to Causal Discovery"
 author: "V Didelez, R Foraita, C W Bang"
 date: "July 25 2022"
 output: rmarkdown::html_vignette
