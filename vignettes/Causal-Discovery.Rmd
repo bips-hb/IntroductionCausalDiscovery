@@ -17,13 +17,11 @@ knitr::opts_chunk$set(echo = TRUE,
                       warning = FALSE, 
                       cache = TRUE, 
                       eval = TRUE)
-
-options(rmarkdown.html_vignette.check_title = FALSE)
 ```
 
 
 ```{r libraries}
-#library(IntroductionCausalDiscovery)
+library(IntroductionCausalDiscovery)
 library(tidyverse)
 library(pcalg)
 ```
