@@ -74,18 +74,18 @@ pcfit05 <- pc(
 
 ```{r fitalpha_tcga}
 pcfit01 <- pc(
-             suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]),
-            indepTest = gaussCItest,
-                alpha = 0.01,
-               labels = colnames(tcgas),
-             maj.rule = T, solve.confl = T, u2pd = "relaxed"
+  suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]),
+  indepTest = gaussCItest,
+  alpha = 0.01,
+  labels = colnames(tcgas),
+  maj.rule = T, solve.confl = T, u2pd = "relaxed"
              )
 pcfit10 <- pc(
-             suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]),
-            indepTest = gaussCItest,
-                alpha = 0.1,
-               labels = colnames(tcgas),
-             maj.rule = T, solve.confl = T, u2pd = "relaxed"
+  suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]),
+  indepTest = gaussCItest,
+  alpha = 0.1,
+  labels = colnames(tcgas),
+  maj.rule = T, solve.confl = T, u2pd = "relaxed"
             )
 ```
 
@@ -113,7 +113,7 @@ fcifit <- fci(
 
 
 ```{r plotfci}
-plot(fcifit, main = "alpha = 5%")
+plot(fcifit)
 ```
 
 
@@ -180,16 +180,17 @@ pcfit_kernel10 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
 ```
 
 ```{r fitkernel2, echo = FALSE, eval = FALSE}
-pcfit_kernel16 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
-                     indepTest = kpcalg::kernelCItest,
-                     alpha = 0.16,
+pcfit_kernel17 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
+                     indepTest = kernelCItest,
+                     alpha = 0.17,
                      labels = colnames(tcgas),
-                     maj.rule = TRUE, solve.confl = TRUE, u2pd = "relaxed")
+                     maj.rule = TRUE, solve.confl = TRUE, u2pd = "relaxed"
+                     )
 ```
 
 ```{r kpcfitload, echo = FALSE}
 load('kernel.RData')
-#save(pcfit_kernel05, pcfit_kernel10, pcfit_kernel16, file = 'kernel.RData')
+#save(pcfit_kernel05, pcfit_kernel10, pcfit_kernel17, file = 'kernel.RData')
 ```
 
 ```{r plot_kpc}
@@ -293,11 +294,11 @@ plot(pcfit_d10@graph, main = "alpha = 10%")
 
 # Comparison
 
-For all levels of alpha we got 12 edges with the PC-algorithm:
-```{r comparison_pc, echo = FALSE}
-par(mfrow = c(1,3))
+For alpha = 0.05 and alpha = 0.10 we got 12 edges with the PC-algorithm:
 
-plot(pcfit01@graph, main = "alpha = 1%")
+```{r comparison_pc, echo = FALSE}
+par(mfrow = c(1,2))
+
 plot(pcfit05@graph, main = "alpha = 5%")
 plot(pcfit10@graph, main = "alpha = 10%")
 ```
@@ -319,25 +320,25 @@ fcifit <- fci(
 ```{r plotfci2}
 par(mfrow = c(1,1))
 
-plot(fcifit, main = "alpha = 10%")
+plot(fcifit)
 ```
 
 
-When running the PC-algorithm with kernel independence test, we get 12 edges if we set alpha = 0.16:
+When running the PC-algorithm with kernel independence test, we get 12 edges if we set alpha = 0.17:
 
 ```{r fitkernel3, eval = FALSE}
-pcfit_kernel16 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
+pcfit_kernel17 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
                      indepTest = kernelCItest,
-                     alpha = 0.16,
+                     alpha = 0.17,
                      labels = colnames(tcgas),
                      maj.rule = TRUE, solve.confl = TRUE, u2pd = "relaxed")
 ```
 
 ```{r plotkernel2}
-plot(pcfit_kernel16, main = "alpha = 16%")
+plot(pcfit_kernel17, main = "alpha = 17%")
 ```
 
-When running the PC-algorithm with the generalised covariance measure as our choice of independence test, we get 12 edges for both levels of alpha:
+When running the PC-algorithm with the generalised covariance measure as our choice of independence test, we got 12 edges for both levels of alpha:
 
 ```{r plot_gcm2}
 par(mfrow = c(1,2))
