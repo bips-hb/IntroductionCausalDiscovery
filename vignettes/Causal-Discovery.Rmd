@@ -13,17 +13,17 @@ vignette: >
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, 
                       fig.width = 6, 
-                      message = F, 
-                      warning = F, 
-                      cache = T, 
-                      eval = FALSE)
+                      message = FALSE, 
+                      warning = FALSE, 
+                      cache = TRUE, 
+                      eval = TRUE)
 
 options(rmarkdown.html_vignette.check_title = FALSE)
 ```
 
 
 ```{r libraries}
-library(IntroductionCausalDiscovery)
+#library(IntroductionCausalDiscovery)
 library(tidyverse)
 library(pcalg)
 ```
@@ -33,10 +33,7 @@ library(pcalg)
 
 ```{r read_tcga}
 data(tcgas)
-```
 
-
-```{r dim_tcga}
 dim(tcgas)
 ```
 
@@ -65,7 +62,7 @@ tcgas %>%
 # PC-algorithm
 
 ```{r fitpc_tcga}
-pcfit <- pc(
+pcfit05 <- pc(
   suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]), # correlation matrix and the number of observations
   indepTest = gaussCItest, # our choice of independence test
   alpha = 0.05, # our choice of "significance level"
@@ -77,23 +74,25 @@ pcfit <- pc(
 We get 12 edges regardless of the level of alpha:
 
 ```{r fitalpha_tcga}
-plot(pc(
-  suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]),
-  indepTest = gaussCItest,
-  alpha = 0.01,
-  labels = colnames(tcgas),
-  maj.rule = T, solve.confl = T, u2pd = "relaxed"
-  )@graph, main = "alpha = 1%")
+pcfit01 <- pc(
+             suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]),
+            indepTest = gaussCItest,
+                alpha = 0.01,
+               labels = colnames(tcgas),
+             maj.rule = T, solve.confl = T, u2pd = "relaxed"
+             )
+pcfit10 <- pc(
+             suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]),
+            indepTest = gaussCItest,
+                alpha = 0.1,
+               labels = colnames(tcgas),
+             maj.rule = T, solve.confl = T, u2pd = "relaxed"
+            )
 
-plot(pcfit@graph, main = "alpha = 5%")
 
-plot(pc(
-  suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]),
-  indepTest = gaussCItest,
-  alpha = 0.1,
-  labels = colnames(tcgas),
-  maj.rule = T, solve.confl = T, u2pd = "relaxed"
-  )@graph, main = "alpha = 10%")
+plot(pcfit01@graph, main = "alpha = 1%")
+plot(pcfit05@graph, main = "alpha = 5%")
+plot(pcfit10@graph, main = "alpha = 10%")
 ```
 
 # FCI-algorithm
@@ -107,11 +106,10 @@ fcifit <- fci(
   maj.rule = TRUE,
   selectionBias = FALSE
 )
+
+plot(fcifit, main = "alpha = 5%")
 ```
 
-```{r plotfci}
-plot(fcifit)
-```
 
 With alpha = 0.1 we get 12 edges as for the PC-algorithm:
 
@@ -124,22 +122,19 @@ fcifit <- fci(
   maj.rule = TRUE,
   selectionBias = FALSE
 )
+
+plot(fcifit, main = "alpha = 10%")
 ```
 
-```{r plotfci2}
-plot(fcifit)
-```
 
 # GES-algorithm
 
 ```{r fitges_tcga}
 gesfit <- ges(new("GaussL0penObsScore", tcgas))
-```
 
-
-```{r plotges}
 plot(gesfit$essgraph)
 ```
+
 
 
 # LiNGAM
@@ -153,7 +148,6 @@ lingamfit <- lingam(tcgas)
 lingam2graph <- function(fit,data){
   
   amat <- t(fit$Bpruned!=0)
-  
   colnames(amat) <- colnames(data)
   
   output <- as(amat, "graphNEL")
@@ -166,10 +160,7 @@ lingam2graph <- function(fit,data){
 ```{r graphlingam_tcga}
 lingamgraph <- lingam2graph(fit = lingamfit, # fitted object
                             data = tcgas) # data used to fit the object
-```
 
-
-```{r plotlingam}
 plot(lingamgraph)
 ```
 
@@ -177,12 +168,9 @@ plot(lingamgraph)
 
 # Kernel independence tests
 
-```{r lib_kpcalg}
+```{r kpcfit, eval=FALSE}
 library(kpcalg)
-```
 
-
-```{r kpcfit}
 pcfit_kernel05 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
                      indepTest = kernelCItest,
                      alpha = 0.05,
@@ -194,10 +182,14 @@ pcfit_kernel10 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
                      alpha = 0.1,
                      labels = colnames(tcgas),
                      maj.rule = TRUE, solve.confl = TRUE, u2pd = "relaxed")
+}
 ```
 
 
-```{r plotkernel}
+```{r kpcfitload, echo=FALSE}
+load('kernel.RData')
+```
+```{r}
 par(mfrow = c(1,2))
 plot(pcfit_kernel05, main = "alpha = 5%")
 plot(pcfit_kernel10, main = "alpha = 10%")
@@ -213,20 +205,22 @@ pcfit_kernel16 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
                      maj.rule = TRUE, solve.confl = TRUE, u2pd = "relaxed")
 ```
 
+```{r, echo = FALSE, eval = FALSE}
+#save(pcfit_kernel05, pcfit_kernel10, pcfit_kernel16, file = 'kernel.RData')
+```
+
 ```{r plotkernel2}
 par(mfrow = c(1,1))
 plot(pcfit_kernel16, main = "alpha = 16%")
 ```
 
 
+
 # Generalised Covariance Measure
 
-```{r gcm_lib}
+```{r gcm_wrapper, warning=FALSE}
 library(GeneralisedCovarianceMeasure)
-```
 
-
-```{r gcm_wrapper}
 use_gcm <- function(x, y, S, suffStat){
   
   a <- as.matrix(suffStat$data)[,x]
@@ -241,7 +235,7 @@ use_gcm <- function(x, y, S, suffStat){
 ```
 
 
-```{r pcfit_gcm}
+```{r pcfit_gcm, eval = FALSE}
 pcfit_gcm05 <- pc(suffStat = list(data = tcgas, alpha = 0.05),
                   indepTest = use_gcm,
                   alpha = 0.05,
@@ -256,6 +250,11 @@ pcfit_gcm10 <- pc(suffStat = list(data = tcgas, alpha = 0.1),
                   )
 ```
 
+```{r load_gcm, echo = FALSE}
+#save(pcfit_gcm05, pcfit_gcm10, file = 'gcm.RData')
+load('gcm.RData')
+```
+
 For both levels of alpha we get 12 edges:
 
 ```{r plot_gcm}
@@ -266,13 +265,9 @@ plot(pcfit_gcm10, main = "alpha = 10%")
 
 
 # Discrete data
-
-```{r fit_dis}
-data("tcgadisc")
-```
-
-
 ```{r disICfunc}
+data(tcgadisc)
+
 disCItest_mod <- function(x, y, S, suffStat){
   if (is.data.frame(dm <- suffStat$dm)) 
         dm <- data.matrix(dm)
@@ -282,10 +277,7 @@ disCItest_mod <- function(x, y, S, suffStat){
   gSquareDis(x = x, y = y, S = S, dm = dm, nlev = nlev, adaptDF = adaptDF,
              verbose = FALSE, n.min = -1)
 }
-```
-
-
-```{r fitdis}
+ 
 pcfit_d05 <- pc(suffStat = list(dm = tcgadisc, adaptDF = F),
                 indepTest = disCItest_mod,
                 alpha = 0.05,
@@ -361,7 +353,7 @@ colnames(tcgas)[c(1,4,5,6,7)]
 
 
 ```{r possde}
-possDe(t(as(as(gesfit$essgraph, "graphNEL"), "Matrix")), 
+possDe(t(as(as(gesfit$essgraph, "graphNEL"), "matrix")), 
        x = 4, 
        type = "cpdag" 
        )

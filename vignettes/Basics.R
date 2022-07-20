@@ -1,32 +1,12 @@
----
-title: "Statistical Computing 2022: Introduction to Causal Discovery"
-subtitle: "Basics"
-author: "V Didelez, R Foraita, C W Bang"
-date: "July 25 2022"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Basics}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}      
----
-
-  
-```{r setup, include=FALSE}
+## ----setup, include=FALSE-----------------------------------------------------
 knitr::opts_chunk$set(
   echo = TRUE,
   eval = TRUE,
   collapse = TRUE,
   fig.width = 6)
 
-options(rmarkdown.html_vignette.check_title = FALSE)
-```
 
-
-# Make use of the DAGitty package
-
-Enter the following DAG into R: [dagitty.net/ms0VVMy](dagitty.net/ms0VVMy)
-
-```{r dagitty, message=FALSE, warning=FALSE}
+## ----dagitty, warning=FALSE, message=FALSE------------------------------------
 library(dagitty)
 # Build the graph
 g <- dagitty("dag {
@@ -42,30 +22,24 @@ g <- dagitty("dag {
               prior.disease -> ESRD
               }")
 plot(graphLayout(g))
-```
 
-## Making 'earlier smoking' unobserved
-```{r unobserved}
+
+## ----unobserved---------------------------------------------------------------
 g.unob <- g
 latents(g.unob) <- c("earlier.smoking")
-```
 
-## List adjustment sets
-```{r adjustmentsets}
+
+## ----adjustmentsets-----------------------------------------------------------
 adjustmentSets(g, type = "minimal", effect = "total")
 adjustmentSets(g.unob, type = "minimal", effect = "total")
-```
 
-## List testable implications
-```{r}
+
+## -----------------------------------------------------------------------------
 print(impliedConditionalIndependencies(g))
 print(impliedConditionalIndependencies(g.unob))
-```
 
 
-
-## List total effects that are identifiable by regression
-```{r totalEffects}
+## ----totalEffects-------------------------------------------------------------
 for(n in names(g.unob)){
   for(m in setdiff(dagitty::descendants(g.unob, n), n)){
     a <- adjustmentSets(g.unob, n, m)
@@ -76,19 +50,16 @@ for(n in names(g.unob)){
     }
   }
 }
-```
 
-## List all back-door paths
-```{r paths}
+
+## ----paths--------------------------------------------------------------------
 ## show paths
 (pfad <- paths(g.unob, from = "current.smoking", to = "ESRD"))
 # number of open back-door paths
 sum(pfad$open)
-```
 
 
-## Insert new node
-```{r}
+## -----------------------------------------------------------------------------
 g2 <- dagitty("dag {
               ESRD [outcome]
               current.smoking [exposure]
@@ -105,21 +76,17 @@ g2 <- dagitty("dag {
               }")
 plot(graphLayout(g2))
 adjustmentSets(g2)
-```
 
-# Simulated data examples
 
-```{r}
+## -----------------------------------------------------------------------------
 library(gRbase)
-```
 
-## Example 1
 
-```{r, out.width="50%", echo = F}
+## ---- out.width="50%", echo = F-----------------------------------------------
 plot(dag(~X1, ~L, ~X2*X1*L, ~Y*L))
-```
 
-```{r}
+
+## -----------------------------------------------------------------------------
 N <- 1000
 x1 <- sample(c(1,0), N, replace = T)
 l <- rnorm(N, 1, 2)
@@ -127,27 +94,25 @@ p <- 1/(1 + exp(-1.5*x1 * l + 2))
 x2 <- rbinom(N, 1, p)
 
 y <- 0.5 * l + rnorm(N, 2)
-```
 
-```{r}
+
+## -----------------------------------------------------------------------------
 summary(lm(y ~ x1))$coefficients
-```
 
-```{r}
+
+## -----------------------------------------------------------------------------
 summary(lm(y ~ x1 + x2))$coefficients
-```
 
-```{r}
+
+## -----------------------------------------------------------------------------
 summary(lm(y ~ x1 + x2 + l))$coefficients
-```
 
-## Example 2
 
-```{r, out.width="50%", echo = F}
+## ---- out.width="50%", echo = F-----------------------------------------------
 plot(dag(~X1, ~U, ~L*X1*U, ~X2*X1*L, ~Y*L*U*X1*X2))
-```
 
-```{r}
+
+## -----------------------------------------------------------------------------
 N <- 1000
 x1 <- sample(c(1,0), N, replace = T)
 u <- rnorm(N, 2)
@@ -155,35 +120,31 @@ l <- 2 * x1 - u + rnorm(N, 1, 2)
 p <- 1/(1 + exp(-3 * x1 + l)) 
 x2 <- rbinom(N, 1, p)
 y <- u + x1 + l + x2 + rnorm(N)
-```
 
-```{r}
+
+## -----------------------------------------------------------------------------
 summary(lm(y ~ x1 + x2))$coefficients
-```
 
-```{r}
+
+## -----------------------------------------------------------------------------
 summary(lm(y ~ x1 + x2 + l))$coefficients
-```
 
 
-### Randomising $X_2$
-```{r}
+## -----------------------------------------------------------------------------
 x2_new <- sample(c(1,0), N, replace = T)
 y_new <- u + x1 + l + x2_new + rnorm(N)
-```
 
-```{r}
+
+## -----------------------------------------------------------------------------
 summary(lm(y_new ~ x1 + x2_new))$coefficients
-```
 
-### Inverse probability weights
 
-```{r}
+## -----------------------------------------------------------------------------
 log_model <- glm(x2 ~ x1 + l, family = binomial(link="logit"))
 p_hat <- predict(log_model, type = "response")
 w <- (x2 * p_hat + (1 - x2) * (1 - p_hat))^(-1)
-```
 
-```{r}
+
+## -----------------------------------------------------------------------------
 summary(lm(y ~ x1 + x2, weights = w))$coefficients
-```
+
