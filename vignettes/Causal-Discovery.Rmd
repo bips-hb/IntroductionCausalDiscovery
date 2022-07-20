@@ -1,11 +1,11 @@
 ---
-title: "Causal Discovery"
-subtitle: "Statistical Computing 2022: Introduction to Causal Discovery"
+title: "Statistical Computing 2022: Introduction to Causal Discovery"
+subtitle: "Causal Discovery"
 author: "V Didelez, C W Bang"
 date: "July 25 2022"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Causal Reasoning}
+  %\VignetteIndexEntry{Causal Discovery}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}  
 ---
