@@ -1,6 +1,6 @@
 ---
-title: "Causal Discovery"
-subtitle: "Statistical Computing 2022: Introduction to Causal Discovery"
+title: "Statistical Computing 2022: Introduction to Causal Discovery"
+subtitle: "Causal Discovery"
 author: "V Didelez, C W Bang"
 date: "July 25 2022"
 output: rmarkdown::html_vignette
@@ -17,8 +17,6 @@ knitr::opts_chunk$set(echo = TRUE,
                       warning = FALSE, 
                       cache = FALSE, 
                       eval = TRUE)
-
-options(rmarkdown.html_vignette.check_title = FALSE)
 ```
 
 
