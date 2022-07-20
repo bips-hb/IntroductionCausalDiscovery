@@ -361,7 +361,7 @@ pcfit_d36 <- pc(suffStat = list(dm = tcgadisc, adaptDF = F),
 ```{r plot_dis2}
 par(mfrow = c(1,1))
 
-plot(pcfit_d10@graph, main = "alpha = 36%")
+plot(pcfit_d36@graph, main = "alpha = 36%")
 ```
 
 # Causal relations
