@@ -7,7 +7,7 @@ knitr::opts_chunk$set(echo = TRUE,
                       eval = TRUE)
 
 ## -----------------------------------------------------------------------------
-library(IntroductionCausalCiscovery)
+library(IntroductionCausalDiscovery)
 library(tidyverse)
 library(pcalg)
 
@@ -32,7 +32,7 @@ tcgas %>%
   facet_wrap(~ key)
 
 ## ----fitpc_tcga---------------------------------------------------------------
-pcfit <- pc(
+pcfit.tcga <- pc(
   suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]), # correlation matrix and the number of observations
   indepTest = gaussCItest, # our choice of independence test
   alpha = 0.05, # our choice of "significance level"

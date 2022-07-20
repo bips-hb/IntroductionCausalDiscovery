@@ -1,27 +1,29 @@
 ---
-title: "Introduction to Causal Discovery (part 2)"
-subtitle: "Statistical Computing 2022, Reisensburg"
+title: "Causal Discovery"
+subtitle: "Statistical Computing 2022: Introduction to Causal Discovery"
 author: "V Didelez, C W Bang"
 date: "July 25 2022"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to Causal Discovery (part 2)}
+  %\VignetteIndexEntry{Causal Discovery}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}      
+  %\VignetteEncoding{UTF-8}  
 ---
   
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, 
                       fig.width = 6, 
-                      message = F, 
-                      warning = F, 
-                      cache = T, 
+                      message = FALSE, 
+                      warning = FALSE, 
+                      cache = TRUE, 
                       eval = TRUE)
+
+options(rmarkdown.html_vignette.check_title = FALSE)
 ```
 
 
-```{r}
-library(IntroductionCausalCiscovery)
+```{r libraries}
+#library(IntroductionCausalDiscovery)
 library(tidyverse)
 library(pcalg)
 ```
@@ -31,10 +33,7 @@ library(pcalg)
 
 ```{r read_tcga}
 data(tcgas)
-```
 
-
-```{r dim_tcga}
 dim(tcgas)
 ```
 
@@ -62,8 +61,8 @@ tcgas %>%
 
 # PC-algorithm
 
-```{r fitpc_tcga, cache=TRUE}
-pcfit <- pc(
+```{r fitpc_tcga}
+pcfit05 <- pc(
   suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]), # correlation matrix and the number of observations
   indepTest = gaussCItest, # our choice of independence test
   alpha = 0.05, # our choice of "significance level"
@@ -72,30 +71,33 @@ pcfit <- pc(
 )
 ```
 
+We get 12 edges regardless of the level of alpha:
 
-```{r fitalpha_tcga, cache=TRUE}
-plot(pc(
-  suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]),
-  indepTest = gaussCItest,
-  alpha = 0.01,
-  labels = colnames(tcgas),
-  maj.rule = T, solve.confl = T, u2pd = "relaxed"
-  )@graph, main = "alpha = 1%")
+```{r fitalpha_tcga}
+pcfit01 <- pc(
+             suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]),
+            indepTest = gaussCItest,
+                alpha = 0.01,
+               labels = colnames(tcgas),
+             maj.rule = T, solve.confl = T, u2pd = "relaxed"
+             )
+pcfit10 <- pc(
+             suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]),
+            indepTest = gaussCItest,
+                alpha = 0.1,
+               labels = colnames(tcgas),
+             maj.rule = T, solve.confl = T, u2pd = "relaxed"
+            )
 
-plot(pcfit@graph, main = "alpha = 5%")
 
-plot(pc(
-  suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]),
-  indepTest = gaussCItest,
-  alpha = 0.1,
-  labels = colnames(tcgas),
-  maj.rule = T, solve.confl = T, u2pd = "relaxed"
-  )@graph, main = "alpha = 10%")
+plot(pcfit01@graph, main = "alpha = 1%")
+plot(pcfit05@graph, main = "alpha = 5%")
+plot(pcfit10@graph, main = "alpha = 10%")
 ```
 
 # FCI-algorithm
 
-```{r fitfci, cache=TRUE}
+```{r fitfci}
 fcifit <- fci(
   suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]),
   indepTest = gaussCItest,
@@ -104,28 +106,40 @@ fcifit <- fci(
   maj.rule = TRUE,
   selectionBias = FALSE
 )
+
+plot(fcifit, main = "alpha = 5%")
 ```
 
-```{r plotfci}
-plot(fcifit)
+
+With alpha = 0.1 we get 12 edges as for the PC-algorithm:
+
+```{r fitfci2}
+fcifit <- fci(
+  suffStat = list(C = cor(tcgas), n = dim(tcgas)[1]),
+  indepTest = gaussCItest,
+  alpha = 0.1,
+  labels = colnames(tcgas),
+  maj.rule = TRUE,
+  selectionBias = FALSE
+)
+
+plot(fcifit, main = "alpha = 10%")
 ```
 
 
 # GES-algorithm
 
-```{r fitges_tcga, cache=TRUE}
+```{r fitges_tcga}
 gesfit <- ges(new("GaussL0penObsScore", tcgas))
-```
 
-
-```{r plotges}
 plot(gesfit$essgraph)
 ```
 
 
+
 # LiNGAM
 
-```{r fitlingam_tcga, cache=TRUE}
+```{r fitlingam_tcga}
 lingamfit <- lingam(tcgas)
 ```
 
@@ -134,7 +148,6 @@ lingamfit <- lingam(tcgas)
 lingam2graph <- function(fit,data){
   
   amat <- t(fit$Bpruned!=0)
-  
   colnames(amat) <- colnames(data)
   
   output <- as(amat, "graphNEL")
@@ -144,13 +157,10 @@ lingam2graph <- function(fit,data){
 ```
 
 
-```{r graphlingam_tcga, cache=TRUE}
+```{r graphlingam_tcga}
 lingamgraph <- lingam2graph(fit = lingamfit, # fitted object
                             data = tcgas) # data used to fit the object
-```
 
-
-```{r plotlingam}
 plot(lingamgraph)
 ```
 
@@ -158,12 +168,9 @@ plot(lingamgraph)
 
 # Kernel independence tests
 
-```{r lib_kpcalg}
+```{r kpcfit, eval=FALSE}
 library(kpcalg)
-```
 
-
-```{r kpcfit, cache=TRUE}
 pcfit_kernel05 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
                      indepTest = kernelCItest,
                      alpha = 0.05,
@@ -175,24 +182,45 @@ pcfit_kernel10 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
                      alpha = 0.1,
                      labels = colnames(tcgas),
                      maj.rule = TRUE, solve.confl = TRUE, u2pd = "relaxed")
+}
 ```
 
 
-```{r plotkernel}
+```{r kpcfitload, echo=FALSE}
+load('kernel.RData')
+```
+```{r}
 par(mfrow = c(1,2))
 plot(pcfit_kernel05, main = "alpha = 5%")
 plot(pcfit_kernel10, main = "alpha = 10%")
 ```
 
+With alpha = 0.16 we get 12 edges:
 
-# Generalised Covariance Measure
+```{r fitkernel2}
+pcfit_kernel16 <- pc(suffStat = list(data = tcgas, ic.method = "dcc.perm"),
+                     indepTest = kernelCItest,
+                     alpha = 0.16,
+                     labels = colnames(tcgas),
+                     maj.rule = TRUE, solve.confl = TRUE, u2pd = "relaxed")
+```
 
-```{r gcm_lib}
-library(GeneralisedCovarianceMeasure)
+```{r, echo = FALSE, eval = FALSE}
+#save(pcfit_kernel05, pcfit_kernel10, pcfit_kernel16, file = 'kernel.RData')
+```
+
+```{r plotkernel2}
+par(mfrow = c(1,1))
+plot(pcfit_kernel16, main = "alpha = 16%")
 ```
 
 
-```{r gcm_wrapper}
+
+# Generalised Covariance Measure
+
+```{r gcm_wrapper, warning=FALSE}
+library(GeneralisedCovarianceMeasure)
+
 use_gcm <- function(x, y, S, suffStat){
   
   a <- as.matrix(suffStat$data)[,x]
@@ -207,7 +235,7 @@ use_gcm <- function(x, y, S, suffStat){
 ```
 
 
-```{r pcfit_gcm, cache=TRUE}
+```{r pcfit_gcm, eval = FALSE}
 pcfit_gcm05 <- pc(suffStat = list(data = tcgas, alpha = 0.05),
                   indepTest = use_gcm,
                   alpha = 0.05,
@@ -222,6 +250,12 @@ pcfit_gcm10 <- pc(suffStat = list(data = tcgas, alpha = 0.1),
                   )
 ```
 
+```{r load_gcm, echo = FALSE}
+#save(pcfit_gcm05, pcfit_gcm10, file = 'gcm.RData')
+load('gcm.RData')
+```
+
+For both levels of alpha we get 12 edges:
 
 ```{r plot_gcm}
 par(mfrow = c(1,2))
@@ -230,15 +264,10 @@ plot(pcfit_gcm10, main = "alpha = 10%")
 ```
 
 
-
 # Discrete data
-
-```{r fit_dis}
-data("tcgadisc")
-```
-
-
 ```{r disICfunc}
+data(tcgadisc)
+
 disCItest_mod <- function(x, y, S, suffStat){
   if (is.data.frame(dm <- suffStat$dm)) 
         dm <- data.matrix(dm)
@@ -248,10 +277,7 @@ disCItest_mod <- function(x, y, S, suffStat){
   gSquareDis(x = x, y = y, S = S, dm = dm, nlev = nlev, adaptDF = adaptDF,
              verbose = FALSE, n.min = -1)
 }
-```
-
-
-```{r fitdis, cache=TRUE}
+ 
 pcfit_d05 <- pc(suffStat = list(dm = tcgadisc, adaptDF = F),
                 indepTest = disCItest_mod,
                 alpha = 0.05,
@@ -273,22 +299,24 @@ plot(pcfit_d05@graph, main = "alpha = 5%")
 plot(pcfit_d10@graph, main = "alpha = 10%")
 ```
 
+With alpha = 0.36 we get 12 edges:
+
+```{r fit_dis2}
+pcfit_d36 <- pc(suffStat = list(dm = tcgadisc, adaptDF = F),
+                indepTest = disCItest_mod,
+                alpha = 0.36,
+                labels = colnames(tcgadisc),
+                maj.rule = T, solve.confl = T, u2pd = "relaxed"
+                )
+```
+
+
+```{r plot_dis2}
+par(mfrow = c(1,1))
+plot(pcfit_d10@graph, main = "alpha = 36%")
+```
 
 # Comparison
-
-```{r compare_fit}
-par(mfrow = c(1,2))
-plot(pcfit@graph, main = "PC (left) and FCI (right)")
-plot(fcifit)
-par(mfrow = c(1,2))
-plot(gesfit$essgraph, main = "GES")
-plot(lingamgraph, main = "LiNGAM")
-par(mfrow = c(1,2))
-plot(pcfit_gcm10@graph, main = "GCM")
-plot(pcfit_kernel10@graph, main = "Kernel")
-par(mfrow = c(1,1))
-plot(pcfit_d10@graph, main = "Discrete")
-```
 
 
 ```{r libgrbase}
@@ -325,7 +353,7 @@ colnames(tcgas)[c(1,4,5,6,7)]
 
 
 ```{r possde}
-possDe(t(as(as(gesfit$essgraph, "graphNEL"), "Matrix")), 
+possDe(t(as(as(gesfit$essgraph, "graphNEL"), "matrix")), 
        x = 4, 
        type = "cpdag" 
        )

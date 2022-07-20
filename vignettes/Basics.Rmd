@@ -1,11 +1,11 @@
 ---
-title: "Introduction to Causal Discovery (part 1)"
-subtitle: "Statistical Computing 2022, Reisensburg"
+title: "Basics"
+subtitle: "Statistical Computing 2022: Introduction to Causal Discovery"
 author: "V Didelez, R Foraita, C W Bang"
 date: "July 25 2022"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to Causal Discovery (part 1)}
+  %\VignetteIndexEntry{Basics}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}      
 ---
@@ -17,6 +17,8 @@ knitr::opts_chunk$set(
   eval = TRUE,
   collapse = TRUE,
   fig.width = 6)
+
+options(rmarkdown.html_vignette.check_title = FALSE)
 ```
 
 
